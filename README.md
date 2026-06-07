@@ -1,5 +1,11 @@
 # @ethanhann/mantine-can
 
+[![npm version](https://img.shields.io/npm/v/@ethanhann/mantine-can.svg)](https://www.npmjs.com/package/@ethanhann/mantine-can)
+[![CI](https://github.com/ethanhann/mantine-can/actions/workflows/ci.yml/badge.svg)](https://github.com/ethanhann/mantine-can/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fethanhann.github.io%2Fmantine-can%2Fcoverage-badge.json)](https://ethanhann.github.io/mantine-can)
+[![Storybook](https://img.shields.io/badge/Storybook-deployed-ff4785?logo=storybook&logoColor=white)](https://ethanhann.github.io/mantine-can)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+
 The **gate layer** for the Mantine family. Where nav/dataview/detail render
 content, `mantine-can` decides whether a given subject may see or do a thing,
 and renders that decision as **hide**, **disable**, or an **upgrade prompt**.
