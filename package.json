@@ -1,0 +1,91 @@
+{
+	"name": "@ethanhann/mantine-can",
+	"version": "0.1.0",
+	"description": "The gate layer for the Mantine family: can(...) and feature(...) return a decision, not a boolean — rendered as hide, disable, or an upgrade prompt. Built on Mantine v9.",
+	"type": "module",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		},
+		"./styles.css": "./dist/mantine-can.css",
+		"./presets": {
+			"types": "./dist/presets/index.d.ts",
+			"import": "./dist/presets/index.js"
+		}
+	},
+	"files": [
+		"dist"
+	],
+	"sideEffects": [
+		"**/*.css"
+	],
+	"scripts": {
+		"dev": "storybook dev -p 6006",
+		"build": "vite build",
+		"test": "vitest",
+		"test:run": "vitest run",
+		"test:coverage": "vitest run --coverage",
+		"typecheck": "tsc --noEmit",
+		"lint": "biome check .",
+		"format": "biome format --write .",
+		"lint:package": "publint --strict",
+		"check:exports": "attw --pack . --profile esm-only --exclude-entrypoints styles.css",
+		"check:package": "node scripts/check-package.mjs",
+		"storybook:build": "storybook build",
+		"prepublishOnly": "npm run build"
+	},
+	"engines": {
+		"node": ">=18"
+	},
+	"peerDependencies": {
+		"@mantine/core": "^9.0.0",
+		"@mantine/hooks": "^9.0.0",
+		"react": "^19.0.0",
+		"react-dom": "^19.0.0"
+	},
+	"devDependencies": {
+		"@arethetypeswrong/cli": "^0.18.3",
+		"@axe-core/react": "^4.11.1",
+		"@biomejs/biome": "2.4.16",
+		"@mantine/core": "^9.3.0",
+		"@mantine/hooks": "^9.3.0",
+		"@storybook/addon-a11y": "^10.3.4",
+		"@storybook/addon-docs": "^10.4.2",
+		"@storybook/react": "^10.3.4",
+		"@storybook/react-vite": "^10.3.4",
+		"@tabler/icons-react": "^3.41.1",
+		"@testing-library/dom": "^10.4.1",
+		"@testing-library/jest-dom": "^6.9.1",
+		"@testing-library/react": "^16.3.2",
+		"@testing-library/user-event": "^14.6.1",
+		"@types/node": "^22.19.20",
+		"@types/react": "^19.2.14",
+		"@types/react-dom": "^19.2.3",
+		"@vitejs/plugin-react": "^6.0.1",
+		"@vitest/coverage-v8": "^4.1.2",
+		"jsdom": "^29.0.1",
+		"postcss": "^8.5.8",
+		"postcss-preset-mantine": "^1.18.0",
+		"postcss-simple-vars": "^7.0.1",
+		"publint": "^0.3.21",
+		"react": "^19.2.4",
+		"react-dom": "^19.2.4",
+		"storybook": "^10.3.4",
+		"typescript": "^6.0.2",
+		"unplugin-dts": "^1.0.2",
+		"vite": "^8.0.3",
+		"vitest": "^4.1.2",
+		"vitest-axe": "^0.1.0"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/ethanhann/mantine-can-prototype.git"
+	},
+	"publishConfig": {
+		"registry": "https://registry.npmjs.org"
+	},
+	"license": "MIT"
+}
