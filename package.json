@@ -1,6 +1,6 @@
 {
 	"name": "@ethanhann/mantine-can",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"description": "The gate layer for the Mantine family: can(...) and feature(...) return a decision (not a boolean) rendered as hide, disable, or an upgrade prompt. Built on Mantine v9.",
 	"type": "module",
 	"module": "./dist/index.js",
