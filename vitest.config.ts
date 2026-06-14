@@ -1,5 +1,6 @@
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vitest/config";
+import { NON_LIBRARY_SOURCE } from "./config.shared";
 
 export default defineConfig({
 	plugins: [react()],
@@ -13,13 +14,8 @@ export default defineConfig({
 			provider: "v8",
 			reporter: ["text", "json-summary", "json"],
 			include: ["src/**/*.{ts,tsx}"],
-			exclude: [
-				"src/**/*.test.{ts,tsx}",
-				"src/test/**",
-				"src/stories/**",
-				"src/**/*.stories.tsx",
-				"src/index.ts",
-			],
+			// Shared non-library globs, plus the barrel (re-exports only, nothing to cover).
+			exclude: [...NON_LIBRARY_SOURCE, "src/index.ts"],
 			thresholds: {
 				statements: 90,
 				branches: 85,

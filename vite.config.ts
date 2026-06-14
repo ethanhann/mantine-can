@@ -2,6 +2,7 @@ import { resolve } from "node:path";
 import react from "@vitejs/plugin-react";
 import dts from "unplugin-dts/vite";
 import { defineConfig } from "vite";
+import { NON_LIBRARY_SOURCE } from "./config.shared";
 
 export default defineConfig({
 	plugins: [
@@ -9,11 +10,7 @@ export default defineConfig({
 		dts({
 			tsconfigPath: "tsconfig.build.json",
 			include: ["src"],
-			exclude: [
-				"src/**/*.test.{ts,tsx}",
-				"src/test/**",
-				"src/**/*.stories.tsx",
-			],
+			exclude: NON_LIBRARY_SOURCE,
 		}),
 	],
 	build: {
