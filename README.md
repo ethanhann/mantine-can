@@ -158,7 +158,6 @@ type DenyReason =
 type Remedy =
     | { kind: "none" }                    // hard deny, hide or disable
     | { kind: "upgrade"; toTier: string } // upgrade prompt
-    | { kind: "requestAccess" }           // request-access affordance
     | { kind: "signIn" };                 // redirect to sign-in
 ```
 
@@ -227,7 +226,12 @@ Driven by the decision; selected via the `fallback` prop or the provider default
 | `hide`     | default for authz denials        | nothing                                  |
 | `disable`  | opt-in                           | children disabled + reason tooltip       |
 | `upgrade`  | remedy is `upgrade`              | one of the upgrade sub-variants          |
-| `redirect` | route guards / `unauthenticated` | navigates (consumer-supplied navigation) |
+| `redirect` | route guards only                | navigates (consumer-supplied navigation) |
+
+`redirect` is **only** available through the route guard components
+(`<RequireAuth>` / `<RequireRole>`), which own the navigation. It is not a valid
+gate `fallback` or `presentation.default`: a gate has no navigate function, so
+that renders nothing (and warns in development).
 
 **Upgrade sub-variants** (`variant`, or `presentation.upgrade.mode`): `teaser`
 (blurred behind a lock + CTA), `replace` (swapped for an upgrade card), `badge`
