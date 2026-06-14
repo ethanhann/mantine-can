@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * Hooks: the headless way to read a decision.
  *
@@ -8,7 +10,8 @@
  * re-renders without re-running `authorize`/`entitle`.
  */
 
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
+import { assertNever } from "./assertNever.js";
 import { can, feature } from "./predicates.js";
 import {
 	type CanContextValue,
@@ -35,23 +38,29 @@ function resourceKey(resource: unknown): string {
 		}
 		return `#${id}`;
 	}
-	return `=${String(resource)}`;
+	// Tag primitives by type so the number 1 and the string "1" don't collide.
+	return `=${typeof resource}:${String(resource)}`;
 }
 
+// User-supplied names/roles are JSON-encoded (quoted + escaped) so that a value
+// containing a delimiter can't alias a different requirement shape — e.g. the
+// role "a,b" must not key the same as the roles ["a", "b"].
 function requirementKey(requirement: GateRequirement): string {
 	switch (requirement.type) {
 		case "authenticated":
 			return "auth";
 		case "role":
-			return `role:${requirement.anyOf.join(",")}`;
+			return `role:${JSON.stringify(requirement.anyOf)}`;
 		case "flag":
-			return `flag:${requirement.name}`;
+			return `flag:${JSON.stringify(requirement.name)}`;
 		case "feature":
-			return `feat:${requirement.name}`;
+			return `feat:${JSON.stringify(requirement.name)}`;
 		case "permission":
-			return `perm:${requirement.action}:${resourceKey(requirement.resource)}`;
+			return `perm:${JSON.stringify(requirement.action)}:${resourceKey(requirement.resource)}`;
 		case "anyOf":
-			return `any(${requirement.anyOf.map(requirementKey).join("|")})`;
+			return `any:${JSON.stringify(requirement.anyOf.map(requirementKey))}`;
+		default:
+			return assertNever(requirement);
 	}
 }
 
@@ -59,7 +68,9 @@ function signature(
 	requirements: GateRequirement[],
 	snapshotVersion: string | number,
 ): string {
-	return `${snapshotVersion}|${requirements.map(requirementKey).join(";")}`;
+	// Encode the whole thing structurally so per-key delimiters can't collide at
+	// the join boundary either.
+	return JSON.stringify([snapshotVersion, requirements.map(requirementKey)]);
 }
 
 /**
@@ -107,5 +118,10 @@ export interface SubjectState<Subject = unknown> {
 /** Read the current subject and snapshot status. */
 export function useSubject<Subject = unknown>(): SubjectState<Subject> {
 	const { subject, status } = useCanContext();
-	return { subject: subject as Subject | null, status };
+	// Stable identity while subject/status are unchanged, so the result is safe to
+	// use as an effect/memo dependency or behind React.memo.
+	return useMemo(
+		() => ({ subject: subject as Subject | null, status }),
+		[subject, status],
+	);
 }

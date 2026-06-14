@@ -7,6 +7,7 @@
  * avoids revealing a hard-denied thing as an upsell.
  */
 
+import { assertNever } from "../assertNever.js";
 import type { Decision, Denied } from "../types/decision.js";
 import type {
 	PresentationMode,
@@ -46,5 +47,7 @@ export function selectPresentation(
 						variant: variantOverride ?? presentation.upgrade.mode,
 					}
 				: { kind: "hide" };
+		default:
+			return assertNever(mode);
 	}
 }

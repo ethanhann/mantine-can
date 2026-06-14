@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * `<Gate>` is the general gate component. It combines requirements (authz-first
  * via the engine), then renders the decision through the shared presentation
@@ -42,3 +44,5 @@ export function Gate({
 		</Presentation>
 	);
 }
+
+Gate.displayName = "Gate";

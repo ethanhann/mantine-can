@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * `<Feature>` is entitlement sugar. Defaults to an upgrade prompt when the tier
  * is too low:
@@ -41,3 +43,5 @@ export function Feature({
 		</Gate>
 	);
 }
+
+Feature.displayName = "Feature";

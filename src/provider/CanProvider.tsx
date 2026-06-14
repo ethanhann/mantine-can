@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * `<CanProvider>` holds the policy snapshot and interpreters for the current
  * subject, and binds the engine so gates/hooks resolve synchronously.
@@ -79,6 +81,11 @@ export function CanProvider<Policy, Subject>(
 
 	// Derive a snapshot version that bumps once per subject/policy change, so the
 	// engine re-binds exactly once on re-hydration and stays stable in between.
+	//
+	// The refs are mutated during render, which is safe here because the result is
+	// a pure function of the current props: the bump is guarded by a prev-vs-current
+	// identity check, so re-running render (StrictMode's double-invoke, or a
+	// discarded concurrent render) recomputes the same version rather than drifting.
 	const versionRef = useRef(0);
 	const depsRef = useRef<{ policy: unknown; subject: unknown } | null>(null);
 	if (snapshotVersionProp === undefined) {
@@ -90,13 +97,17 @@ export function CanProvider<Policy, Subject>(
 	}
 	const snapshotVersion = snapshotVersionProp ?? versionRef.current;
 
+	// Bind the engine on its own, keyed only on what resolution actually depends
+	// on. This keeps `resolve` referentially stable across presentation/onUpgrade/
+	// status changes, so hooks keep their memoized decisions (and an N×M grid does
+	// not re-run authorize/entitle) even when those purely-presentational props are
+	// passed inline.
+	const gate = useMemo(
+		() => createGate<Policy, Subject>({ subject, policy, authorize, entitle }),
+		[subject, policy, authorize, entitle],
+	);
+
 	const value = useMemo<CanContextValue>(() => {
-		const gate = createGate<Policy, Subject>({
-			subject,
-			policy,
-			authorize,
-			entitle,
-		});
 		return {
 			subject,
 			policy,
@@ -109,6 +120,7 @@ export function CanProvider<Policy, Subject>(
 			snapshotVersion,
 		};
 	}, [
+		gate,
 		subject,
 		policy,
 		status,
@@ -121,3 +133,5 @@ export function CanProvider<Policy, Subject>(
 
 	return <CanContext.Provider value={value}>{children}</CanContext.Provider>;
 }
+
+CanProvider.displayName = "CanProvider";

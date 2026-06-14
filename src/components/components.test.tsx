@@ -244,4 +244,29 @@ describe("<RequireRole>", () => {
 		expect(navigate).toHaveBeenCalledWith("/403");
 		expect(screen.queryByText("Admin")).not.toBeInTheDocument();
 	});
+
+	it("does not re-navigate when navigate identity changes across renders while denied", () => {
+		const Wrapper = makeWrapper();
+		const nav1 = vi.fn();
+		const { rerender } = render(
+			<Wrapper>
+				<RequireRole anyOf={["admin"]} redirectTo="/403" navigate={nav1}>
+					<div>Admin</div>
+				</RequireRole>
+			</Wrapper>,
+		);
+		expect(nav1).toHaveBeenCalledTimes(1);
+
+		// A fresh navigate identity (as with an inline arrow) must not re-fire.
+		const nav2 = vi.fn();
+		rerender(
+			<Wrapper>
+				<RequireRole anyOf={["admin"]} redirectTo="/403" navigate={nav2}>
+					<div>Admin</div>
+				</RequireRole>
+			</Wrapper>,
+		);
+		expect(nav2).not.toHaveBeenCalled();
+		expect(nav1).toHaveBeenCalledTimes(1);
+	});
 });

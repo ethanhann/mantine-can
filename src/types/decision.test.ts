@@ -39,8 +39,6 @@ function describeRemedy(remedy: Remedy): string {
 			return "none";
 		case "upgrade":
 			return `upgrade:${remedy.toTier}`;
-		case "requestAccess":
-			return "requestAccess";
 		case "signIn":
 			return "signIn";
 		default:
@@ -105,13 +103,11 @@ describe("Remedy exhaustiveness", () => {
 		const remedies: Remedy[] = [
 			{ kind: "none" },
 			{ kind: "upgrade", toTier: "pro" },
-			{ kind: "requestAccess" },
 			{ kind: "signIn" },
 		];
 		expect(remedies.map(describeRemedy)).toEqual([
 			"none",
 			"upgrade:pro",
-			"requestAccess",
 			"signIn",
 		]);
 	});

@@ -115,6 +115,25 @@ describe("CanProvider", () => {
 		expect(view.ctx.resolve([feature("pdf")])).toEqual({ allowed: true });
 	});
 
+	it("keeps resolve stable when only presentation/onUpgrade change (memoization survives inline props)", () => {
+		// Same policy/subject/authorize/entitle identities across renders; only the
+		// presentational props churn (as they would when passed inline).
+		const policy = { actions: ["export"], tier: "free" };
+		const view = renderWithProvider({ policy, onUpgrade: () => {} });
+		const resolve1 = view.ctx.resolve;
+
+		view.rerender({
+			policy,
+			presentation: { default: "disable" },
+			onUpgrade: () => {},
+		});
+
+		// resolve (the gate) is unchanged, so hooks keep their memoized decisions...
+		expect(view.ctx.resolve).toBe(resolve1);
+		// ...while the new presentation still propagates through the context value.
+		expect(view.ctx.presentation.default).toBe("disable");
+	});
+
 	it("defaults onUpgrade to a no-op when not supplied", () => {
 		const { ctx } = renderWithProvider({
 			policy: { actions: [], tier: "free" },

@@ -12,6 +12,7 @@
  * group fails only when every branch fails, and the most actionable remedy wins.
  */
 
+import { assertNever } from "../assertNever.js";
 import {
 	allow,
 	type Decision,
@@ -90,6 +91,11 @@ function evaluate(requirement: Requirement, context: ResolveContext): Decision {
 				{ kind: "upgrade", toTier: result.requiredTier },
 			);
 		}
+
+		default:
+			// A non-Requirement reached evaluate (e.g. a JS consumer, or a nested
+			// anyOf, which the types forbid). Fail loudly instead of returning undefined.
+			return assertNever(requirement);
 	}
 }
 
@@ -100,8 +106,6 @@ function evaluate(requirement: Requirement, context: ResolveContext): Decision {
 function actionability(remedy: Remedy): number {
 	switch (remedy.kind) {
 		case "upgrade":
-			return 3;
-		case "requestAccess":
 			return 2;
 		case "signIn":
 			return 1;

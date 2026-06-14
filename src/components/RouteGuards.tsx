@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * Route guards that redirect on denial:
  *
@@ -9,7 +11,7 @@
  * still hydrating, the guard waits and renders `fallback` rather than redirecting.
  */
 
-import { type ReactNode, useEffect } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
 import { useGate, useSubject } from "../hooks.js";
 import { authenticated, role } from "../predicates.js";
 import type { GateRequirement } from "../types/requirement.js";
@@ -41,11 +43,19 @@ function useRedirectGuard(
 	const { status } = useSubject();
 	const denied = status === "ready" && !decision.allowed;
 
+	// Keep the latest navigate/redirectTo in a ref so the redirect effect depends
+	// only on `denied`. Otherwise an inline `navigate` (a fresh identity each
+	// render, the common case) would re-fire navigation on every render while
+	// denied stays true.
+	const target = useRef({ navigate, redirectTo });
+	target.current = { navigate, redirectTo };
+
 	useEffect(() => {
 		if (denied) {
-			(navigate ?? defaultNavigate)(redirectTo);
+			const { navigate: nav, redirectTo: to } = target.current;
+			(nav ?? defaultNavigate)(to);
 		}
-	}, [denied, navigate, redirectTo]);
+	}, [denied]);
 
 	if (status === "loading") {
 		return "loading";
@@ -65,6 +75,8 @@ export function RequireAuth({
 	return state === "allowed" ? children : (fallback ?? null);
 }
 
+RequireAuth.displayName = "RequireAuth";
+
 export interface RequireRoleProps extends GuardProps {
 	/** The subject must hold any one of these roles. */
 	anyOf: string[];
@@ -80,3 +92,5 @@ export function RequireRole({
 	const state = useRedirectGuard([role(...anyOf)], redirectTo, navigate);
 	return state === "allowed" ? children : (fallback ?? null);
 }
+
+RequireRole.displayName = "RequireRole";

@@ -27,7 +27,6 @@ export type DenyReason =
 export type Remedy =
 	| { kind: "none" } // hard deny → hide/disable
 	| { kind: "upgrade"; toTier: string } // → upgrade prompt
-	| { kind: "requestAccess" } // → request-access affordance
 	| { kind: "signIn" }; // → redirect to sign-in
 
 /**

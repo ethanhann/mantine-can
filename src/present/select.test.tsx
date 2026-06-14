@@ -100,6 +100,12 @@ describe("selectPresentation", () => {
 		});
 	});
 
+	it("throws on an unknown mode (exhaustiveness guard)", () => {
+		expect(() =>
+			selectPresentation(hardDeny, "bogus" as PresentationMode, RESOLVED),
+		).toThrow(/unexpected variant/);
+	});
+
 	it("honors a per-gate variant override", () => {
 		expect(
 			selectPresentation(upgradeDeny, "upgrade", RESOLVED, "teaser"),
@@ -125,7 +131,7 @@ describe("text helpers", () => {
 		).toMatch(/pro plan/);
 		expect(
 			reasonText({ kind: "quota", name: "seats", limit: 5, used: 5 }),
-		).toMatch(/5\/5/);
+		).toMatch(/seats.*5\/5/);
 	});
 
 	it("labels CTAs and returns null for a hard denial", () => {
@@ -164,6 +170,29 @@ describe("Presentation modes", () => {
 		expect(container.querySelector('[aria-disabled="true"]')).not.toBeNull();
 	});
 
+	it("disable: puts the control in an inert subtree so it can't be activated by keyboard", () => {
+		const { container } = wrap(
+			<Presentation decision={hardDeny} mode="disable">
+				{<button type="button">Delete</button>}
+			</Presentation>,
+		);
+		const inert = container.querySelector("[inert]");
+		expect(inert).not.toBeNull();
+		expect(inert?.contains(screen.getByText("Delete"))).toBe(true);
+	});
+
+	it("warns and renders nothing when redirect is used as a gate fallback (guards-only mode)", () => {
+		const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+		wrap(
+			<Presentation decision={hardDeny} mode="redirect">
+				{<button type="button">Delete</button>}
+			</Presentation>,
+		);
+		expect(screen.queryByText("Delete")).not.toBeInTheDocument();
+		expect(warn).toHaveBeenCalledWith(expect.stringContaining("redirect"));
+		warn.mockRestore();
+	});
+
 	it("hides when upgrade mode meets a hard denial (can't upsell)", () => {
 		wrap(
 			<Presentation decision={hardDeny} mode="upgrade">
@@ -186,6 +215,32 @@ describe("Presentation upgrade variants", () => {
 		expect(screen.getByText("Export")).toBeInTheDocument();
 		fireEvent.click(screen.getByText("Pro"));
 		expect(onUpgrade).toHaveBeenCalledWith(upgradeDeny.reason);
+	});
+
+	it("badge: CTA is keyboard-activatable (Enter fires onUpgrade)", () => {
+		const onUpgrade = vi.fn();
+		wrap(
+			<Presentation decision={upgradeDeny} mode="upgrade" variant="badge">
+				{<button type="button">Export</button>}
+			</Presentation>,
+			{ onUpgrade },
+		);
+		const cta = screen.getByText("Pro").closest('[role="button"]');
+		expect(cta).not.toBeNull();
+		expect(cta).toHaveAttribute("tabindex", "0");
+		fireEvent.keyDown(cta as Element, { key: "Enter" });
+		expect(onUpgrade).toHaveBeenCalledWith(upgradeDeny.reason);
+	});
+
+	it("badge: keeps the gated control in an inert subtree (CTA is the only interactive element)", () => {
+		const { container } = wrap(
+			<Presentation decision={upgradeDeny} mode="upgrade" variant="badge">
+				{<button type="button">Export</button>}
+			</Presentation>,
+		);
+		const inert = container.querySelector("[inert]");
+		expect(inert).not.toBeNull();
+		expect(inert?.contains(screen.getByText("Export"))).toBe(true);
 	});
 
 	it("replace: swaps children for a card with the CTA", () => {

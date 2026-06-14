@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * The CanProvider context that gates and hooks read.
  *

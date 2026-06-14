@@ -66,6 +66,18 @@ describe("useSubject", () => {
 		});
 		expect(result.current.subject).toBeNull();
 	});
+
+	it("returns a stable reference across re-renders when subject/status are unchanged", () => {
+		const { result, rerender } = renderHook(
+			() => useSubject<{ id: string }>(),
+			{
+				wrapper: makeWrapper(),
+			},
+		);
+		const first = result.current;
+		rerender();
+		expect(result.current).toBe(first);
+	});
 });
 
 describe("useCan", () => {
@@ -174,6 +186,26 @@ describe("memoization", () => {
 		rerender();
 		expect(result.current).toBe(first); // same reference
 		expect(authorize).toHaveBeenCalledTimes(1); // not re-evaluated
+	});
+
+	it("does not collide memo keys when a role name contains the delimiter", () => {
+		// authorize allows only a two-element role list.
+		const authorize = vi.fn(
+			(_p: Policy, req: { type: string; action?: string }) =>
+				req.type === "role" &&
+				(req as unknown as { anyOf: string[] }).anyOf.length === 2,
+		);
+		let roles = ["a", "b"]; // → role:["a","b"]
+		const { result, rerender } = renderHook(() => useGate([role(...roles)]), {
+			wrapper: makeWrapper({ authorize }),
+		});
+		expect(result.current.allowed).toBe(true);
+
+		// Single role "a,b" — would share the old `role:a,b` key and wrongly hit the
+		// cached "allowed" decision. With encoded keys it re-evaluates and denies.
+		roles = ["a,b"];
+		rerender();
+		expect(result.current.allowed).toBe(false);
 	});
 
 	it("re-evaluates when the resource identity changes", () => {

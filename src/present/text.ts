@@ -17,9 +17,11 @@ export function reasonText(reason: DenyReason): string {
 		case "tier":
 			return `Requires the ${reason.required} plan.`;
 		case "flag":
+			// Deliberately generic: flag names are internal and shouldn't leak to
+			// end users. Override the Disabled/Upgrade slots for custom copy.
 			return "This feature isn't available.";
 		case "quota":
-			return `Limit reached (${reason.used}/${reason.limit}).`;
+			return `Limit reached for ${reason.name} (${reason.used}/${reason.limit}).`;
 	}
 }
 
@@ -28,8 +30,6 @@ export function ctaLabel(remedy: Remedy): string | null {
 	switch (remedy.kind) {
 		case "upgrade":
 			return `Upgrade to ${remedy.toTier}`;
-		case "requestAccess":
-			return "Request access";
 		case "signIn":
 			return "Sign in";
 		case "none":

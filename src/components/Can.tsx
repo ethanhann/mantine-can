@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * `<Can>` is authorization sugar. Hidden when denied by default:
  *
@@ -37,3 +39,5 @@ export function Can<R = unknown>({
 		</Gate>
 	);
 }
+
+Can.displayName = "Can";

@@ -311,6 +311,14 @@ describe("anyOf within an AND (precedence inversion)", () => {
 	});
 });
 
+describe("exhaustiveness guard", () => {
+	it("throws on a malformed requirement reaching evaluate (e.g. a nested anyOf)", () => {
+		expect(() =>
+			resolve([{ type: "bogus" } as unknown as GateRequirement], ctx()),
+		).toThrow(/unexpected variant/);
+	});
+});
+
 describe("createGate", () => {
 	it("binds a context and resolves against it", () => {
 		const gate = createGate(

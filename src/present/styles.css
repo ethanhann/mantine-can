@@ -1,9 +1,20 @@
 /* mantine-can presentation affordances. Import via "@ethanhann/mantine-can/styles.css". */
 
+/*
+ * Visual dimming for a gated control. Non-interactivity is enforced by the
+ * `inert` attribute in the markup (which removes the control from the tab order
+ * and hit-testing), not by `pointer-events`, so keyboard users can't activate it
+ * either. `pointer-events` is intentionally left alone so the reason tooltip
+ * still shows on hover of the wrapper.
+ */
 .mc-disabled {
 	opacity: 0.55;
-	pointer-events: none;
 	cursor: not-allowed;
+}
+
+/* Inner inert wrapper; transparent to layout so the extra node doesn't shift it. */
+.mc-disabled__content {
+	display: contents;
 }
 
 .mc-teaser {

@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * `<Presentation>` renders a decision. It is the shared rendering core that the
  * `<Can>`, `<Feature>`, and `<Gate>` components delegate to.
@@ -17,6 +19,20 @@ import type {
 } from "../types/presentation.js";
 import { DefaultDisabled, DefaultPending, DefaultUpgrade } from "./defaults.js";
 import { selectPresentation } from "./select.js";
+
+/**
+ * `redirect` only works through the route guards (`<RequireAuth>`/`<RequireRole>`),
+ * which navigate via an effect and never render through `<Presentation>`. A gate's
+ * `fallback="redirect"` (or `presentation.default: "redirect"`) therefore has no
+ * navigate function and renders nothing. Warn in dev so that's not silent.
+ */
+function warnRedirectUnsupported(): void {
+	if (process.env.NODE_ENV !== "production") {
+		console.warn(
+			"mantine-can: `redirect` is not supported as a gate `fallback` / `presentation.default` — gates cannot navigate, so nothing is rendered. Use <RequireAuth>/<RequireRole> (or a custom guard) to redirect on denial.",
+		);
+	}
+}
 
 export interface PresentationProps {
 	decision: Decision;
@@ -46,8 +62,12 @@ export function Presentation({
 			return children;
 
 		case "hide":
+			return null;
+
 		case "redirect":
-			// Hidden here; route guards perform navigation for redirect.
+			// Gates can't navigate; only the route guards redirect (and they don't
+			// render through Presentation). Treat as hide, but warn in dev.
+			warnRedirectUnsupported();
 			return null;
 
 		case "disable": {
@@ -69,3 +89,5 @@ export function Presentation({
 		}
 	}
 }
+
+Presentation.displayName = "Presentation";
